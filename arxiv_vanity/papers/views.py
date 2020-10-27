@@ -133,6 +133,16 @@ def paper_detail(request, arxiv_id):
     else:
         raise Exception(f"Unknown render state: {render_to_display.state}")
 
+def paper_update(request, arxiv_id):
+    arxiv_id, version = remove_version_from_arxiv_id(arxiv_id)
+    if version is not None:
+        return redirect("paper_update", arxiv_id=arxiv_id)
+
+     try:
+         _, _ = Paper.objects.update_or_create_from_arxiv_id(arxiv_id)
+     except PaperNotFoundError:
+         raise Http404(f"Paper '{arxiv_id}' not found on arXiv")
+     return redirect("paper_detail", arxiv_id=arxiv_id)
 
 @never_cache
 def paper_render_state(request, arxiv_id):
